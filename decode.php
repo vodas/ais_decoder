@@ -139,16 +139,56 @@ if (substr($binaryPayload,61,1) == 0) {
             $value = $value.'1';
         }
     }
-
     $message['longitude'] = -(bindec($value)+1)/600000;
+    if ($message['longitude'] == 181) {
+        $message['longitude'] = 'not available';
+    }
 }
 
 if (substr($binaryPayload,89,1) == 0) {
     $message['latitude'] = bindec(substr($binaryPayload, 90, 26))/600000;
 } else {
-
+    $value = '';
+    for ($i = 0 ; $i < 26; $i++) {
+        if (substr($binaryPayload,91+$i,1) == 1) {
+            $value = $value.'0';
+        } else {
+            $value = $value.'1';
+        }
+    }
+    $message['latitude'] = -(bindec($value)+1)/600000;
+}
+if($message['latitude'] == 91) {
+    $message['latitude'] = 'not available';
 }
 
+$message['courseOverGround'] = bindec(substr($binaryPayload,116,12))/10;
+if ($message['courseOverGround'] == 360) {
+    $message['courseOverGround'] = 'not available';
+}
+$message['trueHeading'] = bindec(substr($binaryPayload,128,9));
+if ($message['trueHeading'] == 511) {
+    $message['trueHeading'] = 'not available';
+}
+$message['timeStamp'] = bindec(substr($binaryPayload,137,6));
+if ($message['timeStamp'] == 60) {
+    $message['timeStamp'] = 'not available';
+} else if ($message['timeStamp'] == 61) {
+    $message['timeStamp'] = 'positioning system is in manual input mode';
+} else if ($message['timeStamp'] == 62) {
+    $message['timeStamp'] = 'electronic position fixing system operates in estimated (dead reckoning) mode';
+} else if ($message['timeStamp'] == 63) {
+    $message['timeStamp'] = 'positioning system is inoperative';
+}
+$message['maneuverIndicator'] = bindec(substr($binaryPayload,143,2));
+if ($message['maneuverIndicator'] == 0) {
+    $message['maneuverIndicator'] = 'not available';
+} elseif ($message['maneuverIndicator'] == 1) {
+    $message['maneuverIndicator'] = 'No special maneuver';
+} elseif ($message['maneuverIndicator'] == 2) {
+    $message['maneuverIndicator'] = 'Special maneuver';
+}
+$message['raimFlag'] = substr($binaryPayload,148,1);
 
 
 
